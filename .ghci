@@ -1,0 +1,1 @@
+:def hoogledoc \x -> return $ ":!hoogle --info \"" ++ x ++ "\""
