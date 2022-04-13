@@ -13,10 +13,12 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as T.Encoding
 import Data.Text.Lazy
 import Data.Text.Lazy.Encoding as TL.Encoding
+import FizzBuzz (fizzBuzz)
 import Network.HTTP.Req
-import Network.HTTP.Types (mkStatus)
+import Network.HTTP.Types (mkStatus, status400)
 import Network.HTTP.Types.Method
 import Network.Wai.Middleware.Cors
+import Text.Read (readMaybe)
 import UnliftIO.Exception
 import Web.Scotty
 
@@ -49,6 +51,15 @@ mainScotty = scotty 3000 $ do
       InvalidHandle errStr -> do
         status $ mkStatus 404 $ B.pack "Handle not found."
         text errStr
+
+  addroute Network.HTTP.Types.Method.GET "/fizzbuzz/:arg" $ do
+    arg <- param "arg"
+    let n = readMaybe $ T.unpack arg :: Maybe Int
+    case n of
+      Just val -> Web.Scotty.text $ fromStrict $ T.unlines $ fizzBuzz val
+      _ -> do
+        status status400
+        text "Not a valid n"
 
 data HandleInfo
   = ValidHandle Text

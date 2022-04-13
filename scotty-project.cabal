@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      FizzBuzz
       Lib
   other-modules:
       Paths_scotty_project
@@ -40,6 +41,7 @@ library
     , req
     , scotty
     , text
+    , text-show
     , unliftio
     , wai-cors
   default-language: Haskell2010
@@ -62,6 +64,7 @@ executable scotty-project-exe
     , scotty
     , scotty-project
     , text
+    , text-show
     , unliftio
     , wai-cors
   default-language: Haskell2010
@@ -85,6 +88,7 @@ test-suite scotty-project-test
     , scotty
     , scotty-project
     , text
+    , text-show
     , unliftio
     , wai-cors
   default-language: Haskell2010
