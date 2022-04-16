@@ -33,6 +33,8 @@ dependencies:
 - wai-cors
 - http-types
 - text-show
+- hex-text
+- vector
 
 library:
   source-dirs: src
