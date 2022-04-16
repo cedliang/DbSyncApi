@@ -2,6 +2,7 @@
 
 module GetHandle
   ( getHandle,
+    getHandleNew,
     HandleInfo (ValidHandle, InvalidHandle),
   )
 where

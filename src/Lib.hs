@@ -20,7 +20,7 @@ import Network.Wai.Middleware.Cors
 import Text.Read (readMaybe)
 import UnliftIO.Exception
 import Web.Scotty
-import GetHandle ( getHandle, HandleInfo (ValidHandle, InvalidHandle))
+import GetHandle ( getHandle, getHandleNew, HandleInfo (ValidHandle, InvalidHandle))
 import GetTx ( getTx, AddrInfo (ValidHash, InvalidHash))
 
 mainScotty :: IO ()
@@ -45,3 +45,11 @@ mainScotty = scotty 3000 $ do
         status $ mkStatus 404 $ B.pack "Handle not found."
         text errStr
 
+  addroute Network.HTTP.Types.Method.GET "/adahandlenew/:handle" $ do
+    inputHandle <- param "handle"
+    thandle <- liftAndCatchIO $ getHandleNew inputHandle
+    case thandle of
+      ValidHandle handle -> Web.Scotty.text handle
+      InvalidHandle errStr -> do
+        status $ mkStatus 404 $ B.pack "Handle not found."
+        text errStr
