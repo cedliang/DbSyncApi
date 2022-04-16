@@ -8,13 +8,8 @@ module SendDbReq
 where
 
 import Data.Aeson
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T.Encoding
 import Data.Text.Lazy
-import Data.Text.Lazy.Encoding as TL.Encoding
 import Network.HTTP.Req
-import Network.HTTP.Types (mkStatus, status400)
-import Text.Read (readMaybe)
 import UnliftIO.Exception
 
 data ReqResponse

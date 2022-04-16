@@ -10,22 +10,15 @@ where
 import Control.Monad.IO.Class
 import Data.Aeson
 import Data.Aeson.Types
-import qualified Data.ByteString.Char8 as B
 import qualified Data.ByteString.Lazy as BL
 import Data.Foldable (toList)
 import Data.Maybe (fromJust)
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T.Encoding
-import Data.Text.Lazy
-import Data.Text.Lazy.Encoding as TL.Encoding
+import Data.Text.Lazy as TL
+import Data.Text.Lazy.Encoding as TL
 import Data.Vector
 import Network.HTTP.Req
-import Network.HTTP.Types (mkStatus, status400)
 import SendDbReq (ReqResponse (InvalidResponse, ValidResponse), sendReq)
 import Text.Hex (encodeHex)
-import Text.Read (readMaybe)
-import UnliftIO.Exception
-import Web.Scotty (liftAndCatchIO)
 
 data HandleInfo
   = ValidHandle Text
@@ -42,9 +35,9 @@ optionScheme hexHandleName =
 
 getHandle :: Text -> IO HandleInfo
 getHandle handleName = do
-  let hexHandleName = case Data.Text.Lazy.head handleName of
-        '$' -> encodeHex $ BL.toStrict $ TL.Encoding.encodeUtf8 $ Data.Text.Lazy.tail handleName
-        _ -> encodeHex $ BL.toStrict $ TL.Encoding.encodeUtf8 handleName
+  let hexHandleName = case TL.head handleName of
+        '$' -> encodeHex $ BL.toStrict $ TL.encodeUtf8 $ TL.tail handleName
+        _ -> encodeHex $ BL.toStrict $ TL.encodeUtf8 handleName
   let reqString = hexHandleName
 
   thandle <- liftIO $ sendReq $ optionScheme $ fromStrict reqString

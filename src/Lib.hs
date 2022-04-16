@@ -5,22 +5,12 @@ module Lib
   )
 where
 
-import Control.Monad
-import Control.Monad.IO.Class
-import Data.Aeson
 import qualified Data.ByteString.Char8 as B
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T.Encoding
-import Data.Text.Lazy
-import Data.Text.Lazy.Encoding as TL.Encoding
 import GetHandle (HandleInfo (InvalidHandle, ValidHandle), getHandle)
 import GetTx (AddrInfo (InvalidHash, ValidHash), getTx)
-import Network.HTTP.Req
-import Network.HTTP.Types (mkStatus, status400)
+import Network.HTTP.Types (mkStatus)
 import Network.HTTP.Types.Method
 import Network.Wai.Middleware.Cors
-import Text.Read (readMaybe)
-import UnliftIO.Exception
 import Web.Scotty
 
 mainScotty :: IO ()
