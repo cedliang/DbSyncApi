@@ -25,7 +25,8 @@ source-repository head
 
 library
   exposed-modules:
-      FizzBuzz
+      GetHandle
+      GetTx
       Lib
   other-modules:
       Paths_scotty_project
