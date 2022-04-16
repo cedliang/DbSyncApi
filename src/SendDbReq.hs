@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module SendDbReq
@@ -21,8 +22,8 @@ data ReqResponse
   | InvalidResponse Text
   deriving (Eq, Show)
 
-sendReq :: Text -> IO ReqResponse
-sendReq sendStr = do
+sendReq :: Option 'Https -> IO ReqResponse
+sendReq queryScheme = do
   result <-
     UnliftIO.Exception.try
       ( runReq defaultHttpConfig $ do
@@ -31,11 +32,7 @@ sendReq sendStr = do
             (https "cedric.app" /: "api" /: "dbsync" /: "postgrest" /: "ma_tx_out")
             NoReqBody
             jsonResponse
-            $ "select" =: ("id,tx_out!inner(id,address),multi_asset!inner(id,policy,name)" :: Text)
-              <> "order" =: ("id.desc" :: Text)
-              <> "limit" =: (1 :: Int)
-              <> "multi_asset.policy" =: ("eq.\\xf0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a" :: Text)
-              <> "multi_asset.name" =: ("eq.\\x" <> sendStr :: Text)
+            queryScheme
       ) ::
       (FromJSON j) => IO (Either HttpException (JsonResponse j))
 

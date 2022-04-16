@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module GetHandle
@@ -31,6 +32,14 @@ data HandleInfo
   | InvalidHandle Text
   deriving (Eq, Show)
 
+optionScheme :: Text -> Option 'Https
+optionScheme hexHandleName =
+  "select" =: ("id,tx_out!inner(id,address),multi_asset!inner(id,policy,name)" :: Text)
+    <> "order" =: ("id.desc" :: Text)
+    <> "limit" =: (1 :: Int)
+    <> "multi_asset.policy" =: ("eq.\\xf0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a" :: Text)
+    <> "multi_asset.name" =: ("eq.\\x" <> hexHandleName :: Text)
+
 getHandle :: Text -> IO HandleInfo
 getHandle handleName = do
   let hexHandleName = case Data.Text.Lazy.head handleName of
@@ -38,7 +47,7 @@ getHandle handleName = do
         _ -> encodeHex $ BL.toStrict $ TL.Encoding.encodeUtf8 handleName
   let reqString = hexHandleName
 
-  thandle <- liftIO $ sendReq $ fromStrict reqString
+  thandle <- liftIO $ sendReq $ optionScheme $ fromStrict reqString
 
   case thandle of
     ValidResponse val ->
@@ -48,6 +57,7 @@ getHandle handleName = do
             Just hdl -> return $ ValidHandle hdl
     InvalidResponse errorMessage -> return $ InvalidHandle "\tNot a valid handle."
   where
+    valParse :: Value -> Parser (Maybe Text)
     valParse = withArray "Response" arrayParse
 
     arrayParse :: Vector Value -> Parser (Maybe Text)
