@@ -17,14 +17,14 @@ data ReqResponse
   | InvalidResponse Text
   deriving (Eq, Show)
 
-sendReq :: Option 'Https -> IO ReqResponse
-sendReq queryScheme = do
+sendReq :: Option 'Https -> Text -> IO ReqResponse
+sendReq queryScheme searchTable = do
   result <-
     UnliftIO.Exception.try
       ( runReq defaultHttpConfig $ do
           req
             Network.HTTP.Req.GET
-            (https "cedric.app" /: "api" /: "dbsync" /: "postgrest" /: "ma_tx_out")
+            (https "cedric.app" /: "api" /: "dbsync" /: "postgrest" /~ searchTable)
             NoReqBody
             jsonResponse
             queryScheme
@@ -32,7 +32,6 @@ sendReq queryScheme = do
       (FromJSON j) => IO (Either HttpException (JsonResponse j))
 
   case result of
-    Left (VanillaHttpException e) -> do
-      return $ InvalidResponse "\tNot a valid request - Vanilla"
+    Left (VanillaHttpException e) -> return $ InvalidResponse "\tNot a valid request - Vanilla"
     Left _ -> return $ InvalidResponse "\tNot a valid request - Json"
     Right v -> return $ ValidResponse (responseBody v :: Value)

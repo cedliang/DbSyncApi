@@ -33,14 +33,18 @@ optionScheme hexHandleName =
     <> "multi_asset.policy" =: ("eq.\\xf0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a" :: Text)
     <> "multi_asset.name" =: ("eq.\\x" <> hexHandleName :: Text)
 
+searchTable :: Text
+searchTable = "ma_tx_out"
+
 getHandle :: Text -> IO HandleInfo
 getHandle handleName = do
-  let hexHandleName = case TL.head handleName of
-        '$' -> encodeHex $ BL.toStrict $ TL.encodeUtf8 $ TL.tail handleName
-        _ -> encodeHex $ BL.toStrict $ TL.encodeUtf8 handleName
-  let reqString = hexHandleName
+  let hexHandleName = encodeHex $
+        BL.toStrict $
+          TL.encodeUtf8 $ case TL.head handleName of
+            '$' -> TL.tail handleName
+            _ -> handleName
 
-  thandle <- liftIO $ sendReq $ optionScheme $ fromStrict reqString
+  thandle <- liftIO $ sendReq (optionScheme $ fromStrict hexHandleName) searchTable
 
   case thandle of
     ValidResponse val ->
@@ -61,6 +65,4 @@ getHandle handleName = do
         then return Nothing
         else do
           headElem <- withObject "Response[..]" pure $ Data.Vector.head vallst
-          let firstLayer = fromJust $ parseMaybe (.: "tx_out") headElem :: Object
-          let returnText = fromJust $ parseMaybe (.: "address") firstLayer :: Text
-          return $ Just returnText
+          return $ parseMaybe (.: "address") $ fromJust $ parseMaybe (.: "tx_out") headElem
