@@ -13,6 +13,8 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as T.Encoding
 import Data.Text.Lazy
 import Data.Text.Lazy.Encoding as TL.Encoding
+import GetHandle (HandleInfo (InvalidHandle, ValidHandle), getHandle)
+import GetTx (AddrInfo (InvalidHash, ValidHash), getTx)
 import Network.HTTP.Req
 import Network.HTTP.Types (mkStatus, status400)
 import Network.HTTP.Types.Method
@@ -20,8 +22,6 @@ import Network.Wai.Middleware.Cors
 import Text.Read (readMaybe)
 import UnliftIO.Exception
 import Web.Scotty
-import GetHandle ( getHandle, getHandleNew, HandleInfo (ValidHandle, InvalidHandle))
-import GetTx ( getTx, AddrInfo (ValidHash, InvalidHash))
 
 mainScotty :: IO ()
 mainScotty = scotty 3000 $ do
@@ -39,15 +39,6 @@ mainScotty = scotty 3000 $ do
   addroute Network.HTTP.Types.Method.GET "/adahandle/:handle" $ do
     inputHandle <- param "handle"
     thandle <- liftAndCatchIO $ getHandle inputHandle
-    case thandle of
-      ValidHandle handle -> Web.Scotty.text handle
-      InvalidHandle errStr -> do
-        status $ mkStatus 404 $ B.pack "Handle not found."
-        text errStr
-
-  addroute Network.HTTP.Types.Method.GET "/adahandlenew/:handle" $ do
-    inputHandle <- param "handle"
-    thandle <- liftAndCatchIO $ getHandleNew inputHandle
     case thandle of
       ValidHandle handle -> Web.Scotty.text handle
       InvalidHandle errStr -> do
