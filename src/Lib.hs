@@ -27,9 +27,6 @@ mainScotty :: IO ()
 mainScotty = scotty 3000 $ do
   middleware simpleCors
 
-  addroute Network.HTTP.Types.Method.GET "/helloworld" $ do
-    html "Hello, world!"
-
   addroute Network.HTTP.Types.Method.GET "/tx/:txhash" $ do
     inputHash <- param "txhash"
     v <- liftAndCatchIO $ getTx inputHash
