@@ -66,4 +66,5 @@ packages:
 # compiler-check: newer-minor
 
 ghc-options:
-    "$everything": -O2 -j +RTS -A128m -RTS
+    "$everything": -O2 -j
+
