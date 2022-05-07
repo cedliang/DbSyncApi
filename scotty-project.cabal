@@ -40,13 +40,11 @@ library
     , exceptions
     , hex-text
     , http-types
-    , mtl
     , req
     , scotty
     , text
     , text-show
     , transformers
-    , unliftio
     , vector
     , wai-cors
   default-language: Haskell2010
@@ -65,14 +63,12 @@ executable scotty-project-exe
     , exceptions
     , hex-text
     , http-types
-    , mtl
     , req
     , scotty
     , scotty-project
     , text
     , text-show
     , transformers
-    , unliftio
     , vector
     , wai-cors
   default-language: Haskell2010
@@ -92,14 +88,14 @@ test-suite scotty-project-test
     , exceptions
     , hex-text
     , http-types
-    , mtl
     , req
     , scotty
     , scotty-project
+    , tasty
+    , tasty-hunit
     , text
     , text-show
     , transformers
-    , unliftio
     , vector
     , wai-cors
   default-language: Haskell2010

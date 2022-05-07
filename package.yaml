@@ -10,13 +10,6 @@ extra-source-files:
 - README.md
 - ChangeLog.md
 
-# Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
-
-# To avoid duplicated efforts in documentation and dealing with the
-# complications of embedding Haddock markup inside cabal files, it is
-# common to point users to the README.md file.
 description:         Please see the README on GitHub at <https://github.com/githubuser/scotty-project#readme>
 
 dependencies:
@@ -25,13 +18,10 @@ dependencies:
 - http-types
 - text
 - aeson
-- mtl
 - bytestring
 - req
-- unliftio
 - exceptions
 - wai-cors
-- http-types
 - text-show
 - hex-text
 - vector
@@ -61,3 +51,6 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - scotty-project
+    - tasty
+    - tasty-hunit
+
