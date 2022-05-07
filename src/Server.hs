@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lib
+module Server
   ( mainScotty,
   )
 where

@@ -7,7 +7,7 @@ import Control.Monad.Trans.Except (runExceptT)
 import Data.Text.Lazy (pack)
 import Data.Text.Lazy.IO (getLine, putStrLn)
 import GetHandle (getHandle)
-import Lib
+import Server (mainScotty)
 
 main :: IO ()
 main = mainScotty
