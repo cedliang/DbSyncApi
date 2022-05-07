@@ -2,7 +2,6 @@
 
 module GetTx
   ( getTx,
-    AddrInfo (ValidHash, InvalidHash),
   )
 where
 
@@ -11,12 +10,7 @@ import Data.Text.Lazy
 import Network.HTTP.Req
 import UnliftIO.Exception
 
-data AddrInfo
-  = ValidHash Value
-  | InvalidHash Text
-  deriving (Eq, Show)
-
-getTx :: Text -> IO AddrInfo
+getTx :: Text -> IO (Either Text Value)
 getTx addr = do
   result <-
     UnliftIO.Exception.try
@@ -31,6 +25,6 @@ getTx addr = do
       (FromJSON j) => IO (Either HttpException (JsonResponse j))
 
   case result of
-    Left (VanillaHttpException _) -> return $ InvalidHash "\tNot a valid txhash."
-    Left _ -> return $ InvalidHash "\tNot a valid txhash."
-    Right v -> return $ ValidHash (responseBody v :: Value)
+    Left (VanillaHttpException _) -> return $ Left "\tNot a valid txhash."
+    Left _ -> return $ Left "\tNot a valid txhash."
+    Right v -> return $ Right (responseBody v :: Value)

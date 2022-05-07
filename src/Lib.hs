@@ -6,8 +6,8 @@ module Lib
 where
 
 import qualified Data.ByteString.Char8 as B
-import GetHandle (HandleInfo (InvalidHandle, ValidHandle), getHandle)
-import GetTx (AddrInfo (InvalidHash, ValidHash), getTx)
+import GetHandle (getHandle)
+import GetTx (getTx)
 import Network.HTTP.Types (mkStatus)
 import Network.HTTP.Types.Method
 import Network.Wai.Middleware.Cors
@@ -21,8 +21,8 @@ mainScotty = scotty 3000 $ do
     inputHash <- param "txhash"
     v <- liftAndCatchIO $ getTx inputHash
     case v of
-      ValidHash val -> Web.Scotty.json val
-      InvalidHash errStr -> do
+      Right val -> Web.Scotty.json val
+      Left errStr -> do
         status $ mkStatus 404 $ B.pack "Tx not found."
         text errStr
 
@@ -30,7 +30,7 @@ mainScotty = scotty 3000 $ do
     inputHandle <- param "handle"
     thandle <- liftAndCatchIO $ getHandle inputHandle
     case thandle of
-      ValidHandle handle -> Web.Scotty.text handle
-      InvalidHandle errStr -> do
+      Right handle -> Web.Scotty.text handle
+      Left errStr -> do
         status $ mkStatus 404 $ B.pack "Handle not found."
         text errStr

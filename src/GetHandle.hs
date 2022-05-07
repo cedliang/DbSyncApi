@@ -3,7 +3,6 @@
 
 module GetHandle
   ( getHandle,
-    HandleInfo (ValidHandle, InvalidHandle),
   )
 where
 
@@ -17,13 +16,8 @@ import Data.Text.Lazy as TL
 import Data.Text.Lazy.Encoding as TL
 import Data.Vector
 import Network.HTTP.Req
-import SendDbReq (ReqResponse (InvalidResponse, ValidResponse), sendReq)
+import SendDbReq (sendReq)
 import Text.Hex (encodeHex)
-
-data HandleInfo
-  = ValidHandle Text
-  | InvalidHandle Text
-  deriving (Eq, Show)
 
 optionScheme :: Text -> Option 'Https
 optionScheme hexHandleName =
@@ -36,7 +30,7 @@ optionScheme hexHandleName =
 searchTable :: Text
 searchTable = "ma_tx_out"
 
-getHandle :: Text -> IO HandleInfo
+getHandle :: Text -> IO (Either Text Text)
 getHandle handleName = do
   let hexHandleName = encodeHex $
         BL.toStrict $
@@ -47,12 +41,12 @@ getHandle handleName = do
   thandle <- liftIO $ sendReq (optionScheme $ fromStrict hexHandleName) searchTable
 
   case thandle of
-    ValidResponse val ->
+    Right val ->
       let parseOutcome = fromJust $ parseMaybe valParse val
        in case parseOutcome of
-            Nothing -> return $ InvalidHandle "\tNot a valid handle."
-            Just hdl -> return $ ValidHandle hdl
-    InvalidResponse errorMessage -> return $ InvalidHandle "\tNot a valid handle."
+            Nothing -> return $ Left "\tNot a valid handle."
+            Just hdl -> return $ Right hdl
+    Left errorMessage -> return $ Left "\tNot a valid handle."
   where
     valParse :: Value -> Parser (Maybe Text)
     valParse = withArray "Response" arrayParse
