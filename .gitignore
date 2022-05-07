@@ -23,3 +23,6 @@ cabal.project.local~
 .ghc.environment.*
 *.code-workspace
 eventdriven.cabal
+.ghci
+*.cabal
+*.lock
