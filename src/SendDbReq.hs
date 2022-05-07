@@ -13,8 +13,7 @@ import Network.HTTP.Req
 
 sendReq :: Option 'Https -> Text -> ExceptT Int IO Value
 sendReq queryScheme searchTable = do
-  result <-
-    runExceptT $
+  result <- runExceptT $
       ( runReq defaultHttpConfig $ do
           req
             Network.HTTP.Req.GET
