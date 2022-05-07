@@ -6,15 +6,15 @@ module SendDbReq
   )
 where
 
-import Data.Aeson
-import Data.Text.Lazy
+import Control.Monad.Trans.Except (ExceptT, runExceptT, throwE)
+import Data.Aeson (FromJSON, Value)
+import Data.Text.Lazy (Text)
 import Network.HTTP.Req
-import UnliftIO.Exception
 
-sendReq :: Option 'Https -> Text -> IO (Either Int Value)
+sendReq :: Option 'Https -> Text -> ExceptT Int IO Value
 sendReq queryScheme searchTable = do
   result <-
-    UnliftIO.Exception.try
+    runExceptT $
       ( runReq defaultHttpConfig $ do
           req
             Network.HTTP.Req.GET
@@ -22,10 +22,6 @@ sendReq queryScheme searchTable = do
             NoReqBody
             jsonResponse
             queryScheme
-      ) ::
-      (FromJSON j) => IO (Either HttpException (JsonResponse j))
+      )
 
-  case result of
-    Left (VanillaHttpException e) -> return $ Left 400
-    Left _ -> return $ Left 400
-    Right v -> return $ Right (responseBody v :: Value)
+  either (const $ throwE 400) (return . responseBody) result

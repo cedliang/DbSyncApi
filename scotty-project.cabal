@@ -45,7 +45,7 @@ library
     , scotty
     , text
     , text-show
-    , transformers-either
+    , transformers
     , unliftio
     , vector
     , wai-cors
@@ -71,7 +71,7 @@ executable scotty-project-exe
     , scotty-project
     , text
     , text-show
-    , transformers-either
+    , transformers
     , unliftio
     , vector
     , wai-cors
@@ -98,7 +98,7 @@ test-suite scotty-project-test
     , scotty-project
     , text
     , text-show
-    , transformers-either
+    , transformers
     , unliftio
     , vector
     , wai-cors

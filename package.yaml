@@ -35,7 +35,7 @@ dependencies:
 - text-show
 - hex-text
 - vector
-- transformers-either
+- transformers
 
 library:
   source-dirs: src

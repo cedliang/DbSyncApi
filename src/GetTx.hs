@@ -5,15 +5,15 @@ module GetTx
   )
 where
 
+import Control.Monad.Trans.Except (ExceptT, runExceptT, throwE)
 import Data.Aeson
 import Data.Text.Lazy
 import Network.HTTP.Req
-import UnliftIO.Exception
 
-getTx :: Text -> IO (Either Text Value)
+getTx :: Text -> ExceptT Text IO Value
 getTx addr = do
   result <-
-    UnliftIO.Exception.try
+    runExceptT $
       ( runReq defaultHttpConfig $ do
           req
             Network.HTTP.Req.GET
@@ -21,9 +21,6 @@ getTx addr = do
             NoReqBody
             jsonResponse
             (port 5000)
-      ) ::
-      (FromJSON j) => IO (Either HttpException (JsonResponse j))
+      )
 
-  case result of
-    Left _ -> return $ Left "\tNot a valid txhash."
-    Right v -> return $ Right (responseBody v :: Value)
+  either (const $ throwE "\tNot a valid txhash.") (return . responseBody) result

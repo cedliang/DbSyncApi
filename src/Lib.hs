@@ -5,14 +5,15 @@ module Lib
   )
 where
 
-import qualified Data.ByteString.Char8 as B
+import Control.Monad.Trans.Except (runExceptT)
+import Data.ByteString.Char8 as B (pack)
+import Data.Text.Lazy as TL (pack)
 import GetHandle (getHandle)
 import GetTx (getTx)
 import Network.HTTP.Types (mkStatus)
-import Network.HTTP.Types.Method
-import Network.Wai.Middleware.Cors
+import Network.HTTP.Types.Method (StdMethod (GET))
+import Network.Wai.Middleware.Cors (simpleCors)
 import Web.Scotty
-import Data.Text.Lazy (pack)
 
 mainScotty :: IO ()
 mainScotty = scotty 3000 $ do
@@ -20,7 +21,7 @@ mainScotty = scotty 3000 $ do
 
   addroute Network.HTTP.Types.Method.GET "/tx/:txhash" $ do
     inputHash <- param "txhash"
-    v <- liftAndCatchIO $ getTx inputHash
+    v <- liftAndCatchIO $ runExceptT $ getTx inputHash
     case v of
       Right val -> Web.Scotty.json val
       Left errStr -> do
@@ -29,7 +30,7 @@ mainScotty = scotty 3000 $ do
 
   addroute Network.HTTP.Types.Method.GET "/adahandle/:handle" $ do
     inputHandle <- param "handle"
-    thandle <- liftAndCatchIO $ getHandle inputHandle
+    thandle <- liftAndCatchIO $ runExceptT $ getHandle inputHandle
     case thandle of
       Right handle -> Web.Scotty.text handle
       Left sCode -> do
@@ -37,4 +38,4 @@ mainScotty = scotty 3000 $ do
               400 -> "Bad request"
               404 -> "Handle not found"
         status $ mkStatus sCode $ B.pack errStr
-        text $ pack $ show sCode ++ ": " ++ errStr
+        text $ TL.pack $ show sCode ++ ": " ++ errStr
