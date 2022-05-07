@@ -11,13 +11,14 @@ import Data.Aeson
 import Data.Aeson.Types
 import qualified Data.ByteString.Lazy as BL
 import Data.Foldable (toList)
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, fromMaybe)
 import Data.Text.Lazy as TL
 import Data.Text.Lazy.Encoding as TL
 import Data.Vector
 import Network.HTTP.Req
 import SendDbReq (sendReq)
 import Text.Hex (encodeHex)
+import Data.Either (fromRight)
 
 optionScheme :: Text -> Option 'Https
 optionScheme hexHandleName =
@@ -30,7 +31,7 @@ optionScheme hexHandleName =
 searchTable :: Text
 searchTable = "ma_tx_out"
 
-getHandle :: Text -> IO (Either Text Text)
+getHandle :: Text -> IO (Either Int Text)
 getHandle handleName = do
   let hexHandleName = encodeHex $
         BL.toStrict $
@@ -38,25 +39,24 @@ getHandle handleName = do
             '$' -> TL.tail handleName
             _ -> handleName
 
-  thandle <- liftIO $ sendReq (optionScheme $ fromStrict hexHandleName) searchTable
+  thandle <- case handleName of
+    "" -> return $ Left 400
+    _ -> sendReq (optionScheme $ fromStrict hexHandleName) searchTable
 
   case thandle of
-    Right val ->
-      let parseOutcome = fromJust $ parseMaybe valParse val
-       in case parseOutcome of
-            Nothing -> return $ Left "\tNot a valid handle."
-            Just hdl -> return $ Right hdl
-    Left errorMessage -> return $ Left "\tNot a valid handle."
+    Left errStr -> return $ Left errStr
+    Right v -> return $ fromJust $ parseMaybe valParse $ v
+    
   where
-    valParse :: Value -> Parser (Maybe Text)
-    valParse = withArray "Response" arrayParse
+    valParse :: Value -> Parser (Either Int Text)
+    valParse = (fmap $ flip maybe Right . Left $ 404) . withArray "Response" arrayParse
 
     arrayParse :: Vector Value -> Parser (Maybe Text)
     arrayParse arr = do
       let vallst = Data.Vector.fromList $ Data.Foldable.toList arr
 
-      if Data.Vector.null vallst
-        then return Nothing
-        else do
+      case Data.Vector.null $ vallst of
+        True -> pure Nothing
+        False -> do
           headElem <- withObject "Response[..]" pure $ Data.Vector.head vallst
           return $ parseMaybe (.: "address") $ fromJust $ parseMaybe (.: "tx_out") headElem

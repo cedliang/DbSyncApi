@@ -25,6 +25,5 @@ getTx addr = do
       (FromJSON j) => IO (Either HttpException (JsonResponse j))
 
   case result of
-    Left (VanillaHttpException _) -> return $ Left "\tNot a valid txhash."
     Left _ -> return $ Left "\tNot a valid txhash."
     Right v -> return $ Right (responseBody v :: Value)

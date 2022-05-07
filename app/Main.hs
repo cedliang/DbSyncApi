@@ -17,7 +17,7 @@ main = mainScotty
 --   h <- getHandle l
 
 --   let p = case h of
---         ValidHandle handle -> handle
---         InvalidHandle errStr -> errStr
+--         Right handle -> handle
+--         Left errStr -> errStr
 
 --   Data.Text.Lazy.IO.putStrLn p

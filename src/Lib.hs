@@ -12,6 +12,7 @@ import Network.HTTP.Types (mkStatus)
 import Network.HTTP.Types.Method
 import Network.Wai.Middleware.Cors
 import Web.Scotty
+import Data.Text.Lazy (pack)
 
 mainScotty :: IO ()
 mainScotty = scotty 3000 $ do
@@ -31,6 +32,9 @@ mainScotty = scotty 3000 $ do
     thandle <- liftAndCatchIO $ getHandle inputHandle
     case thandle of
       Right handle -> Web.Scotty.text handle
-      Left errStr -> do
-        status $ mkStatus 404 $ B.pack "Handle not found."
-        text errStr
+      Left sCode -> do
+        let errStr = case sCode of
+              400 -> "Bad request"
+              404 -> "Handle not found"
+        status $ mkStatus sCode $ B.pack errStr
+        text $ pack $ show sCode ++ ": " ++ errStr

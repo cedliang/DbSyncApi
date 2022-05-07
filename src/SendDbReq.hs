@@ -11,7 +11,7 @@ import Data.Text.Lazy
 import Network.HTTP.Req
 import UnliftIO.Exception
 
-sendReq :: Option 'Https -> Text -> IO (Either Text Value)
+sendReq :: Option 'Https -> Text -> IO (Either Int Value)
 sendReq queryScheme searchTable = do
   result <-
     UnliftIO.Exception.try
@@ -26,6 +26,6 @@ sendReq queryScheme searchTable = do
       (FromJSON j) => IO (Either HttpException (JsonResponse j))
 
   case result of
-    Left (VanillaHttpException e) -> return $ Left "\tNot a valid request - Vanilla"
-    Left _ -> return $ Left "\tNot a valid request - Json"
+    Left (VanillaHttpException e) -> return $ Left 400
+    Left _ -> return $ Left 400
     Right v -> return $ Right (responseBody v :: Value)
