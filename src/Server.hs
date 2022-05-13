@@ -1,7 +1,9 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Server
   ( mainScotty,
+    getUrlFromConfig,
   )
 where
 
@@ -15,7 +17,7 @@ import Data.Text as T (Text, pack)
 import Data.Text.Lazy as TL (Text, pack)
 import GetHandle (getHandle)
 import GetTx (getTx)
-import Network.HTTP.Req (renderUrl, useHttpsURI, useURI)
+import Network.HTTP.Req (Scheme (Https), Url, renderUrl, useHttpsURI, useURI)
 import Network.HTTP.Types (mkStatus)
 import Network.HTTP.Types.Method (StdMethod (GET))
 import Network.Wai.Middleware.Cors (simpleCors)
@@ -23,8 +25,6 @@ import Network.Wai.Middleware.RequestLogger
 import System.Exit
 import Text.URI (ParseException (ParseException), URI, mkURI)
 import Web.Scotty
-
-data QueryProtocol = Http | Https deriving (Show, Eq)
 
 data Config = Config
   { hostPort :: Int,
@@ -35,13 +35,16 @@ data Config = Config
 defaultConfig :: Config
 defaultConfig = Config {hostPort = 3000, serverUrl = "https://cedric.app/api/dbsync/postgrest"}
 
-mainScotty :: IO ()
-mainScotty = do
+getUrlFromConfig :: IO (Url 'Https)
+getUrlFromConfig = do
   serverUri <- Control.Exception.catch (mkURI $ serverUrl defaultConfig) (const $ die "Invalid URL cannot be parsed" :: ParseException -> IO URI)
   rawServerUrl <- return $ useHttpsURI serverUri
-
   when (isNothing rawServerUrl) (die "Invalid URL cannot be parsed")
-  let queryUrl = fst $ fromJust rawServerUrl
+  return $ fst $ fromJust rawServerUrl
+
+mainScotty :: IO ()
+mainScotty = do
+  queryUrl <- getUrlFromConfig
 
   scotty (hostPort defaultConfig) $ do
     middleware simpleCors
