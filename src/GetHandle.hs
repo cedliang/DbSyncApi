@@ -18,6 +18,7 @@ import Data.Vector (Vector, fromList, head, null)
 import Network.HTTP.Req (Option, Scheme (Https), (=:))
 import SendDbReq (sendReq)
 import Text.Hex (encodeHex)
+import Control.Monad.Trans.Reader
 
 optionScheme :: Text -> Option 'Https
 optionScheme hexHandleName =

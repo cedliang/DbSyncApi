@@ -26,6 +26,8 @@ dependencies:
 - hex-text
 - vector
 - transformers
+- modern-uri
+- wai-extra
 
 library:
   source-dirs: src

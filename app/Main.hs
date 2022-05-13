@@ -8,6 +8,7 @@ import Data.Text.Lazy (pack)
 import Data.Text.Lazy.IO (getLine, putStrLn)
 import GetHandle (getHandle)
 import Server (mainScotty)
+import Control.Monad.Trans.Reader
 
 main :: IO ()
 main = mainScotty
