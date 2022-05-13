@@ -6,10 +6,11 @@ module Server
 where
 
 import Control.Exception (catch)
+import Control.Monad (when)
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.Reader
 import Data.ByteString.Char8 as B (pack)
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, isNothing)
 import Data.Text as T (Text, pack)
 import Data.Text.Lazy as TL (Text, pack)
 import GetHandle (getHandle)
@@ -36,7 +37,11 @@ defaultConfig = Config {hostPort = 3000, serverUrl = "https://cedric.app/api/dbs
 
 mainScotty :: IO ()
 mainScotty = do
-  serverUrl <- Control.Exception.catch (mkURI $ serverUrl defaultConfig) (const $ die "Invalid URL cannot be parsed" :: ParseException -> IO URI)
+  serverUri <- Control.Exception.catch (mkURI $ serverUrl defaultConfig) (const $ die "Invalid URL cannot be parsed" :: ParseException -> IO URI)
+  rawServerUrl <- return $ useHttpsURI serverUri
+
+  when (isNothing rawServerUrl) (die "Invalid URL cannot be parsed")
+  let queryUrl = fst $ fromJust rawServerUrl
 
   scotty (hostPort defaultConfig) $ do
     middleware simpleCors
@@ -53,7 +58,7 @@ mainScotty = do
 
     addroute Network.HTTP.Types.Method.GET "/adahandle/:handle" $ do
       inputHandle <- param "handle"
-      thandle <- liftAndCatchIO $ runExceptT $ getHandle inputHandle
+      thandle <- liftAndCatchIO $ runReaderT (runExceptT $ getHandle inputHandle) queryUrl
       case thandle of
         Right handle -> Web.Scotty.text handle
         Left sCode -> do
