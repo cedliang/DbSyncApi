@@ -68,5 +68,6 @@ mainScotty = do
           let errStr = case sCode of
                 400 -> "Bad request"
                 404 -> "Handle not found"
+                500 -> "Internal server error"
           status $ mkStatus sCode $ B.pack errStr
           text $ TL.pack $ show sCode ++ ": " ++ errStr

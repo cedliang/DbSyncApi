@@ -4,5 +4,4 @@ packages:
 - .
 
 ghc-options:
-    "$everything": -O2 -j
-
+    "$everything": -j
