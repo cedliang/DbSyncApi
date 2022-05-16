@@ -20,7 +20,8 @@ newtype RawHandleAddr = Address TL.Text
 
 instance FromJSON RawHandleAddr where
   parseJSON = withObject "RawhandleAddr" $ \v ->
-    Address <$> ((.: "tx_out") v >>= (.: "address"))
+    Address
+      <$> ((.: "tx_out") v >>= (.: "address"))
 
 getAddr :: RawHandleAddr -> TL.Text
 getAddr (Address a) = a
