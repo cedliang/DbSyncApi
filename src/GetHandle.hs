@@ -4,23 +4,26 @@
 module GetHandle (getHandle) where
 
 import Control.Monad (when)
-import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans.Class (MonadTrans (lift))
 import Control.Monad.Trans.Except (ExceptT, runExceptT, throwE)
-import Control.Monad.Trans.Reader (ReaderT, ask)
-import Data.Aeson (Value, withArray, withObject, (.:))
-import Data.Aeson.Types (Parser, parseMaybe)
+import Control.Monad.Trans.Reader (ReaderT)
+import Data.Aeson
 import Data.ByteString as BL (toStrict)
-import Data.Either (fromRight)
-import Data.Foldable (toList)
-import Data.Maybe (fromJust, fromMaybe)
 import Data.Text.Lazy as TL (Text, fromStrict, head, tail)
 import Data.Text.Lazy.Encoding as TL (encodeUtf8)
-import Data.Vector (Vector, fromList, head, null)
 import Network.HTTP.Req (Option, Scheme (Http, Https), Url, (=:))
 import SendDbReq (sendReq)
 import Text.Hex (encodeHex)
-import Text.URI
+
+newtype RawHandleAddr = Address TL.Text
+  deriving (Show)
+
+getAddr :: RawHandleAddr -> TL.Text
+getAddr (Address a) = a
+
+instance FromJSON RawHandleAddr where
+  parseJSON = withObject "RawhandleAddr" $ \v ->
+    Address <$> ((.: "tx_out") v >>= (.: "address"))
 
 optionSchemeHttps :: Text -> Option 'Https
 optionSchemeHttps hexHandleName =
@@ -47,8 +50,14 @@ getHandle handleName = do
 
   thandle <- lift $ runExceptT $ sendReq (optionSchemeHttps $ removeDollar handleName) searchTable
   case thandle of
-    Left errStr -> throwE 404
-    Right v -> maybe (throwE 404) (return) $ fromJust $ parseMaybe valParse v
+    Left e -> throwE e
+    Right v -> do
+      let r = fromJSON v :: Result [RawHandleAddr]
+
+      case r of
+        Error errStr -> throwE 500
+        Success [] -> throwE 404
+        Success (x : xs) -> return $ getAddr x
 
 removeDollar :: Text -> Text
 removeDollar handleName =
@@ -56,15 +65,3 @@ removeDollar handleName =
         '$' -> TL.tail handleName
         _ -> handleName
    in fromStrict $ encodeHex $ BL.toStrict $ TL.encodeUtf8 $ tailHandleName
-
-valParse :: Value -> Parser (Maybe Text)
-valParse = withArray "Response" arrayParse
-
-arrayParse :: Vector Value -> Parser (Maybe Text)
-arrayParse arr = do
-  let vallst = Data.Vector.fromList $ Data.Foldable.toList arr
-  case Data.Vector.null $ vallst of
-    True -> pure Nothing
-    False -> do
-      headElem <- withObject "Response[..]" pure $ Data.Vector.head vallst
-      return $ parseMaybe (.: "address") $ fromJust $ parseMaybe (.: "tx_out") headElem

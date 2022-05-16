@@ -26,3 +26,4 @@ eventdriven.cabal
 .ghci
 *.cabal
 *.lock
+.DS_Store
