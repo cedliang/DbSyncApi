@@ -18,12 +18,12 @@ import Text.Hex (encodeHex)
 newtype RawHandleAddr = Address TL.Text
   deriving (Show)
 
-getAddr :: RawHandleAddr -> TL.Text
-getAddr (Address a) = a
-
 instance FromJSON RawHandleAddr where
   parseJSON = withObject "RawhandleAddr" $ \v ->
     Address <$> ((.: "tx_out") v >>= (.: "address"))
+
+getAddr :: RawHandleAddr -> TL.Text
+getAddr (Address a) = a
 
 optionSchemeHttps :: Text -> Option 'Https
 optionSchemeHttps hexHandleName =
