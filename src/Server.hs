@@ -38,7 +38,7 @@ defaultConfig = Config {hostPort = 3000, serverUrl = "https://cedric.app/api/dbs
 getUrlFromConfig :: IO (Url 'Https)
 getUrlFromConfig = do
   serverUri <- Control.Exception.catch (mkURI $ serverUrl defaultConfig) (const $ die "Invalid URL cannot be parsed" :: ParseException -> IO URI)
-  rawServerUrl <- return $ useHttpsURI serverUri
+  let rawServerUrl = useHttpsURI serverUri
   when (isNothing rawServerUrl) (die "Invalid URL cannot be parsed")
   return $ fst $ fromJust rawServerUrl
 

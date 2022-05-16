@@ -19,7 +19,7 @@ import Text.URI
 
 sendReq :: Option 'Https -> Text -> ExceptT Int (ReaderT (Url 'Https) IO) Value
 sendReq queryScheme searchTable = do
-  myUri <- lift $ ask
+  myUri <- lift ask
 
   result <- liftIO 
               ( try $ runReq defaultHttpConfig $ do
