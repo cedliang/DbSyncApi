@@ -1,3 +1,4 @@
+{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module GetTx
@@ -5,14 +6,14 @@ module GetTx
   )
 where
 
-import Control.Monad.Trans.Except (ExceptT, runExceptT, throwE)
+import Control.Monad.Trans.Except
 import Data.Aeson
-import Data.Text.Lazy
+import Data.Text.Lazy qualified as TL
 import Network.HTTP.Req
-import Control.Exception (try)
-import Control.Monad.IO.Class (MonadIO(liftIO))
+import Control.Exception
+import Control.Monad.IO.Class 
 
-getTx :: Text -> ExceptT Text IO Value
+getTx :: TL.Text -> ExceptT TL.Text IO Value
 getTx addr = do
   result <- liftIO 
               ( try $ runReq defaultHttpConfig $ do

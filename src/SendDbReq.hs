@@ -1,22 +1,24 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE OverloadedStrings #-}
+
 
 module SendDbReq
   ( sendReq,
   )
 where
 
-import Control.Exception (handle, try)
-import Control.Monad.IO.Class (MonadIO (liftIO))
+import Control.Exception
+import Control.Monad.IO.Class 
 import Control.Monad.Trans.Class
-import Control.Monad.Trans.Except (ExceptT, catchE, runExceptT, throwE)
+import Control.Monad.Trans.Except 
 import Control.Monad.Trans.Reader
-import Data.Aeson (FromJSON, Value)
-import Data.Text.Lazy (Text)
+import Data.Aeson 
+import Data.Text.Lazy qualified as TL
 import Network.HTTP.Req
-import Text.URI
 
-sendReq :: Option 'Https -> Text -> ExceptT Int (ReaderT (Url 'Https) IO) Value
+
+sendReq :: Option 'Https -> TL.Text -> ExceptT Int (ReaderT (Url 'Https) IO) Value
 sendReq queryScheme searchTable = do
   myUri <- lift ask
 

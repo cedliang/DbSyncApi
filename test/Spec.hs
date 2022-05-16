@@ -1,15 +1,15 @@
 {-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-import Control.Exception qualified
-import Control.Monad.Trans.Except (runExceptT)
-import Control.Monad.Trans.Reader (ReaderT (runReaderT))
+import Control.Exception
+import Control.Monad.Trans.Except
+import Control.Monad.Trans.Reader
 import Data.Text.Lazy qualified as TL
-import GetHandle (getHandle)
-import Server (getUrlFromConfig)
-import Test.Tasty (TestTree, defaultMain, testGroup)
-import Test.Tasty.HUnit (Assertion, assertEqual, testCase)
-import Text.URI (ParseException, URI, mkURI)
+import GetHandle
+import Server
+import Test.Tasty
+import Test.Tasty.HUnit
+import Text.URI
 
 main :: IO ()
 main = do

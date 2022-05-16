@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Server
@@ -7,23 +8,23 @@ module Server
   )
 where
 
-import Control.Exception (catch)
-import Control.Monad (when)
-import Control.Monad.Trans.Except (runExceptT)
+import Control.Exception
+import Control.Monad
+import Control.Monad.Trans.Except
 import Control.Monad.Trans.Reader
-import Data.ByteString.Char8 as B (pack)
-import Data.Maybe (fromJust, isNothing)
-import Data.Text as T (Text, pack)
-import Data.Text.Lazy as TL (Text, pack)
-import GetHandle (getHandle)
-import GetTx (getTx)
-import Network.HTTP.Req (Scheme (Https), Url, renderUrl, useHttpsURI, useURI)
-import Network.HTTP.Types (mkStatus)
-import Network.HTTP.Types.Method (StdMethod (GET))
-import Network.Wai.Middleware.Cors (simpleCors)
+import Data.ByteString.Char8 as B
+import Data.Maybe
+import Data.Text qualified as T
+import Data.Text.Lazy qualified as TL
+import GetHandle
+import GetTx
+import Network.HTTP.Req
+import Network.HTTP.Types
+import Network.HTTP.Types.Method
+import Network.Wai.Middleware.Cors
 import Network.Wai.Middleware.RequestLogger
 import System.Exit
-import Text.URI (ParseException (ParseException), URI, mkURI)
+import Text.URI
 import Web.Scotty
 
 data Config = Config
