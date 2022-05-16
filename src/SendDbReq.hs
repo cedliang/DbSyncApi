@@ -14,21 +14,20 @@ import Control.Monad.Trans.Reader
 import Data.Aeson (FromJSON, Value)
 import Data.Text.Lazy (Text)
 import Network.HTTP.Req
-import Network.HTTP.Req (useHttpsURI)
 import Text.URI
 
 sendReq :: Option 'Https -> Text -> ExceptT Int (ReaderT (Url 'Https) IO) Value
 sendReq queryScheme searchTable = do
   myUri <- lift ask
 
-  result <- liftIO 
+  result <- liftIO
               ( try $ runReq defaultHttpConfig $ do
                   req
                     Network.HTTP.Req.GET
                     (myUri /~ searchTable)
                     NoReqBody
                     jsonResponse
-                    queryScheme 
+                    queryScheme
                 :: IO (Either HttpException (JsonResponse Value))
               )
 
