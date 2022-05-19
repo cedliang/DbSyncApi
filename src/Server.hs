@@ -41,7 +41,7 @@ getUrlFromConfig = do
   serverUri <- Control.Exception.catch (mkURI $ serverUrl defaultConfig) (const $ die "Invalid URL cannot be parsed" :: ParseException -> IO URI)
   let rawServerUrl = useHttpsURI serverUri
   when (isNothing rawServerUrl) (die "Invalid URL cannot be parsed")
-  return $ fst $ fromJust rawServerUrl
+  pure $ fst $ fromJust rawServerUrl
 
 mainScotty :: IO ()
 mainScotty = do

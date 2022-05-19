@@ -31,4 +31,4 @@ sendReq queryScheme searchTable = do
                     queryScheme
                 :: IO (Either HttpException (JsonResponse Value))
               )
-  either (const $ throwE 500) (return . responseBody) result
+  either (const $ throwE 500) (pure . responseBody) result

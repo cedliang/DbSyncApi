@@ -55,7 +55,7 @@ getHandle handleName = do
     Right v -> case fromJSON v :: Result [RawHandleAddr] of
       Error errStr -> throwE 500
       Success [] -> throwE 404
-      Success (x : xs) -> return $ getAddr x
+      Success (x : xs) -> pure $ getAddr x
 
 removeDollar :: TL.Text -> TL.Text
 removeDollar handleName =
