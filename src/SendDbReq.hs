@@ -21,7 +21,6 @@ import Network.HTTP.Req
 sendReq :: Option 'Https -> TL.Text -> ExceptT Int (ReaderT (Url 'Https) IO) Value
 sendReq queryScheme searchTable = do
   myUri <- lift ask
-
   result <- liftIO
               ( try $ runReq defaultHttpConfig $ do
                   req
@@ -32,5 +31,4 @@ sendReq queryScheme searchTable = do
                     queryScheme
                 :: IO (Either HttpException (JsonResponse Value))
               )
-
   either (const $ throwE 500) (return . responseBody) result

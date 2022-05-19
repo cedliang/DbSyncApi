@@ -25,5 +25,4 @@ getTx addr = do
                     (port 5000)
                 :: IO (Either HttpException (JsonResponse Value))
               )
-
   either (const $ throwE "\tNot a valid txhash.") (return . responseBody) result

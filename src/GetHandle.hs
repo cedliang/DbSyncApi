@@ -49,17 +49,13 @@ searchTable = "ma_tx_out"
 getHandle :: TL.Text -> ExceptT Int (ReaderT (Url 'Https) IO) TL.Text
 getHandle handleName = do
   when (handleName == "") $ throwE 400
-
   thandle <- lift $ runExceptT $ sendReq (optionSchemeHttps $ removeDollar handleName) searchTable
   case thandle of
     Left e -> throwE e
-    Right v -> do
-      let r = fromJSON v :: Result [RawHandleAddr]
-
-      case r of
-        Error errStr -> throwE 500
-        Success [] -> throwE 404
-        Success (x : xs) -> return $ getAddr x
+    Right v -> case fromJSON v :: Result [RawHandleAddr] of
+      Error errStr -> throwE 500
+      Success [] -> throwE 404
+      Success (x : xs) -> return $ getAddr x
 
 removeDollar :: TL.Text -> TL.Text
 removeDollar handleName =

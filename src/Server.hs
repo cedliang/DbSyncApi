@@ -49,7 +49,7 @@ mainScotty = do
 
   scotty (hostPort defaultConfig) $ do
     middleware simpleCors
-    middleware logStdoutDev
+    middleware logStdout
 
     addroute Network.HTTP.Types.Method.GET "/tx/:txhash" $ do
       inputHash <- param "txhash"
