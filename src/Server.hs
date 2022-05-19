@@ -34,7 +34,7 @@ data Config = Config
   deriving (Show, Eq)
 
 defaultConfig :: Config
-defaultConfig = Config {hostPort = 3000, serverUrl = "https://cedric.app/api/dbsync/postgrest"}
+defaultConfig = Config {hostPort = 5000, serverUrl = "https://cedric.app/api/dbsync/postgrest"}
 
 getUrlFromConfig :: IO (Url 'Https)
 getUrlFromConfig = do
