@@ -1,5 +1,4 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE ImportQualifiedPost #-}
+{-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 
@@ -8,14 +7,14 @@ module SendDbReq
   )
 where
 
-import Control.Exception
-import Control.Monad.IO.Class 
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.Except 
-import Control.Monad.Trans.Reader
-import Data.Aeson 
-import Data.Text.Lazy qualified as TL
-import Network.HTTP.Req
+import           Control.Exception
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.Except
+import           Control.Monad.Trans.Reader
+import           Data.Aeson
+import qualified Data.Text.Lazy             as TL
+import           Network.HTTP.Req
 
 
 sendReq :: Option 'Https -> TL.Text -> ExceptT Int (ReaderT (Url 'Https) IO) Value

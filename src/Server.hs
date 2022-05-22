@@ -1,5 +1,4 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE ImportQualifiedPost #-}
+{-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Server
@@ -8,27 +7,27 @@ module Server
   )
 where
 
-import Control.Exception
-import Control.Monad
-import Control.Monad.Trans.Except
-import Control.Monad.Trans.Reader
-import Data.ByteString.Char8 as B
-import Data.Maybe
-import Data.Text qualified as T
-import Data.Text.Lazy qualified as TL
-import GetHandle
-import GetTx
-import Network.HTTP.Req
-import Network.HTTP.Types
-import Network.HTTP.Types.Method
-import Network.Wai.Middleware.Cors
-import Network.Wai.Middleware.RequestLogger
-import System.Exit
-import Text.URI
-import Web.Scotty
+import           Control.Exception
+import           Control.Monad
+import           Control.Monad.Trans.Except
+import           Control.Monad.Trans.Reader
+import           Data.ByteString.Char8                as B
+import           Data.Maybe
+import qualified Data.Text                            as T
+import qualified Data.Text.Lazy                       as TL
+import           GetHandle
+import           GetTx
+import           Network.HTTP.Req
+import           Network.HTTP.Types
+import           Network.HTTP.Types.Method
+import           Network.Wai.Middleware.Cors
+import           Network.Wai.Middleware.RequestLogger
+import           System.Exit
+import           Text.URI
+import           Web.Scotty
 
 data Config = Config
-  { hostPort :: Int,
+  { hostPort  :: Int,
     serverUrl :: T.Text
   }
   deriving (Show, Eq)

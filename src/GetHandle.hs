@@ -1,20 +1,19 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE ImportQualifiedPost #-}
+{-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module GetHandle (getHandle) where
 
-import Control.Monad
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.Except
-import Control.Monad.Trans.Reader
-import Data.Aeson
-import Data.ByteString qualified as B
-import Data.Text.Lazy qualified as TL
-import Data.Text.Lazy.Encoding qualified as TL
-import Network.HTTP.Req
-import SendDbReq
-import Text.Hex
+import           Control.Monad
+import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.Except
+import           Control.Monad.Trans.Reader
+import           Data.Aeson
+import qualified Data.ByteString            as B
+import qualified Data.Text.Lazy             as TL
+import qualified Data.Text.Lazy.Encoding    as TL
+import           Network.HTTP.Req
+import           SendDbReq
+import           Text.Hex
 
 newtype RawHandleAddr = Address TL.Text
   deriving (Show)
@@ -53,13 +52,13 @@ getHandle handleName = do
   case thandle of
     Left e -> throwE e
     Right v -> case fromJSON v :: Result [RawHandleAddr] of
-      Error errStr -> throwE 500
-      Success [] -> throwE 404
+      Error errStr     -> throwE 500
+      Success []       -> throwE 404
       Success (x : xs) -> pure $ getAddr x
 
 removeDollar :: TL.Text -> TL.Text
 removeDollar handleName =
   let tailHandleName = case TL.head handleName of
         '$' -> TL.tail handleName
-        _ -> handleName
+        _   -> handleName
    in TL.fromStrict $ encodeHex $ B.toStrict $ TL.encodeUtf8 tailHandleName

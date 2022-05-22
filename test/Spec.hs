@@ -36,7 +36,7 @@ main = do
           "empty query check 1"
         ]
 
-  qs <- mapM (flip runReaderT queryUrl . runExceptT . getHandle) hs
+  qs <- traverse (flip runReaderT queryUrl . runExceptT . getHandle) hs
   defaultMain (handleTests qs as names)
 
 handleTests :: (Eq a, Show a) => [a] -> [a] -> [String] -> TestTree
