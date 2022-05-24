@@ -24,15 +24,15 @@ import           Text.URI                             as TU
 data Config = Config
   { hostPort   :: Int,
     serverUrl  :: T.Text,
-    serverPort :: Int
+    serverPort :: Maybe Int
   }
   deriving (Show, Eq)
 
 defaultConfig :: Config
-defaultConfig = Config {hostPort = 4000, serverUrl = "https://cedric.app/api/dbsync/postgrest", serverPort = -1}
+defaultConfig = Config {hostPort = 4000, serverUrl = "https://cedric.app/api/dbsync/postgrest", serverPort = Nothing}
 
 -- defaultConfig :: Config
--- defaultConfig = Config {hostPort = 4000, serverUrl = "http://192.168.20.10/", serverPort = 3000}
+-- defaultConfig = Config {hostPort = 4000, serverUrl = "http://192.168.20.10/", serverPort = Just 3000}
 
 getUrlFromConfig :: IO QueryServerConfig
 getUrlFromConfig = do

@@ -13,15 +13,13 @@ import           Servant
 
 data QueryServerConfig = QueryServerConfig
   { qServerUrl  :: Either (Url 'Http) (Url 'Https),
-    qServerPort :: Int
+    qServerPort :: Maybe Int
   }
 
 sendReq :: (Option 'Http, Option 'Https) -> TL.Text -> ReaderT QueryServerConfig Handler Value
 sendReq queryScheme searchTable = do
   QueryServerConfig myUri qPort <- ask
-  let portScheme = case qPort of
-        -1 -> mempty
-        _  -> port qPort
+  let portScheme = maybe mempty port qPort
   result <- case myUri of
     Left uri  -> liftIO $ httpReq uri portScheme
     Right uri -> liftIO $ httpsReq uri portScheme
