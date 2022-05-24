@@ -14,6 +14,7 @@ import           Servant
 import           Text.Hex
 import           Types
 
+
 newtype RawHandleAddr = Address { getAddr :: TL.Text }
   deriving (Show)
 
