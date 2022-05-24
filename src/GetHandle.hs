@@ -15,16 +15,13 @@ import           Network.HTTP.Req
 import           SendDbReq
 import           Text.Hex
 
-newtype RawHandleAddr = Address TL.Text
+newtype RawHandleAddr = Address { getAddr :: TL.Text }
   deriving (Show)
 
 instance FromJSON RawHandleAddr where
   parseJSON = withObject "RawhandleAddr" $ \v ->
     Address
       <$> ((.: "tx_out") v >>= (.: "address"))
-
-getAddr :: RawHandleAddr -> TL.Text
-getAddr (Address a) = a
 
 optionSchemeHttps :: TL.Text -> Option 'Https
 optionSchemeHttps hexHandleName =
