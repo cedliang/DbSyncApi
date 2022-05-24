@@ -51,3 +51,4 @@ removeDollar handleName =
         '$' -> TL.tail handleName
         _   -> handleName
    in TL.fromStrict $ encodeHex $ B.toStrict $ TL.encodeUtf8 tailHandleName
+   
