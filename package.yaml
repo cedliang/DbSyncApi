@@ -14,7 +14,6 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
-- scotty
 - http-types
 - text
 - aeson
@@ -22,14 +21,10 @@ dependencies:
 - req
 - exceptions
 - wai-cors
-- text-show
 - hex-text
-- vector
-- transformers
 - modern-uri
 - wai-extra
 - servant-server
-- time
 - warp
 - mtl
 

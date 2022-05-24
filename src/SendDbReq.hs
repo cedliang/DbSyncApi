@@ -1,29 +1,34 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module SendDbReq (sendReq) where
+module SendDbReq (sendReq, QueryServerConfig (QueryServerConfig)) where
 
 import           Control.Exception          (try)
 import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.Except
-import           Control.Monad.Trans.Reader
+import           Control.Monad.Reader
 import           Data.Aeson
 import qualified Data.Text.Lazy             as TL
 import           Network.HTTP.Req
 import           Servant
 
-sendReq :: Option 'Https -> TL.Text -> ReaderT (Url 'Https) Handler Value
+data QueryServerConfig = QueryServerConfig
+  { qServerUrl  :: Either (Url 'Http) (Url 'Https),
+    qServerPort :: Int
+  }
+
+sendReq :: (Option 'Http, Option 'Https) -> TL.Text -> ReaderT QueryServerConfig Handler Value
 sendReq queryScheme searchTable = do
-  myUri <- ask
-  result <- liftIO
-              ( try $ runReq defaultHttpConfig $ do
-                  req
-                    Network.HTTP.Req.GET
-                    (myUri /~ searchTable)
-                    NoReqBody
-                    jsonResponse
-                    queryScheme
-                :: IO (Either HttpException (JsonResponse Value))
-              )
+  QueryServerConfig myUri qPort <- ask
+  let portScheme = case qPort of
+        -1 -> mempty
+        _  -> port qPort
+  result <- case myUri of
+    Left uri  -> liftIO $ httpReq uri portScheme
+    Right uri -> liftIO $ httpsReq uri portScheme
   either (const $ lift $ throwError $ err500 {errBody = "Internal server error"}) (pure . responseBody) result
+  where
+    httpReq :: Url 'Http -> Option 'Http -> IO (Either HttpException (JsonResponse Value))
+    httpReq uri portScheme = try $ runReq defaultHttpConfig $ req Network.HTTP.Req.GET (uri /~ searchTable) NoReqBody jsonResponse (fst queryScheme <> portScheme)
+
+    httpsReq :: Url 'Https -> Option 'Https -> IO (Either HttpException (JsonResponse Value))
+    httpsReq uri portScheme = try $ runReq defaultHttpConfig $ req Network.HTTP.Req.GET (uri /~ searchTable) NoReqBody jsonResponse (snd queryScheme <> portScheme)

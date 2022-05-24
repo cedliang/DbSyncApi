@@ -7,7 +7,7 @@ where
 
 import           Control.Exception
 import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Except
+import           Control.Monad.Except
 import           Data.Aeson
 import qualified Data.Text.Lazy             as TL
 import           Network.HTTP.Req
@@ -24,4 +24,4 @@ getTx addr = do
                     (port 5000)
                 :: IO (Either HttpException (JsonResponse Value))
               )
-  either (const $ throwE "\tNot a valid txhash.") (pure . responseBody) result
+  either (const $ throwError "\tNot a valid txhash.") (pure . responseBody) result
