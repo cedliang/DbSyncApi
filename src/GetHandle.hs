@@ -1,9 +1,10 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module GetHandle (getHandle) where
+module GetHandle (handleHandler) where
 
 import           Control.Monad
+import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.Reader
@@ -13,18 +14,16 @@ import qualified Data.Text.Lazy             as TL
 import qualified Data.Text.Lazy.Encoding    as TL
 import           Network.HTTP.Req
 import           SendDbReq
+import           Servant
 import           Text.Hex
 
-newtype RawHandleAddr = Address TL.Text
+newtype RawHandleAddr = Address {getAddr :: TL.Text}
   deriving (Show)
 
 instance FromJSON RawHandleAddr where
   parseJSON = withObject "RawhandleAddr" $ \v ->
     Address
       <$> ((.: "tx_out") v >>= (.: "address"))
-
-getAddr :: RawHandleAddr -> TL.Text
-getAddr (Address a) = a
 
 optionSchemeHttps :: TL.Text -> Option 'Https
 optionSchemeHttps hexHandleName =
@@ -45,16 +44,13 @@ optionSchemeHttp hexHandleName =
 searchTable :: TL.Text
 searchTable = "ma_tx_out"
 
-getHandle :: TL.Text -> ExceptT Int (ReaderT (Url 'Https) IO) TL.Text
-getHandle handleName = do
-  when (handleName == "") $ throwE 400
-  thandle <- lift $ runExceptT $ sendReq (optionSchemeHttps $ removeDollar handleName) searchTable
-  case thandle of
-    Left e -> throwE e
-    Right v -> case fromJSON v :: Result [RawHandleAddr] of
-      Error errStr     -> throwE 500
-      Success []       -> throwE 404
-      Success (x : xs) -> pure $ getAddr x
+handleHandler :: TL.Text -> ReaderT (Url 'Https) Handler TL.Text
+handleHandler inputHandle = do
+  thandle <- sendReq (optionSchemeHttps $ removeDollar inputHandle) searchTable
+  case fromJSON thandle :: Result [RawHandleAddr] of
+    Error _         -> throwError $ err500 {errBody = "Internal server error"}
+    Success []      -> throwError $ err404 {errBody = "Handle not found"}
+    Success (x : _) -> pure $ getAddr x
 
 removeDollar :: TL.Text -> TL.Text
 removeDollar handleName =

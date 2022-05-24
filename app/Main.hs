@@ -1,6 +1,7 @@
 module Main where
 
-import Server (mainScotty)
+
+import Server (servantIO)
 
 main :: IO ()
-main = mainScotty
+main = servantIO

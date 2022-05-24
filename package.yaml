@@ -28,6 +28,10 @@ dependencies:
 - transformers
 - modern-uri
 - wai-extra
+- servant-server
+- time
+- warp
+- mtl
 
 library:
   source-dirs: src

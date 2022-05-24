@@ -1,30 +1,28 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeOperators     #-}
 
-module Server
-  ( mainScotty,
-    getUrlFromConfig,
-  )
-where
+module Server (servantIO) where
 
-import           Control.Exception
+import qualified Control.Exception
 import           Control.Monad
+import           Control.Monad.IO.Class
+import           Control.Monad.Reader
 import           Control.Monad.Trans.Except
-import           Control.Monad.Trans.Reader
-import           Data.ByteString.Char8                as B
+import           Data.Aeson
 import           Data.Maybe
 import qualified Data.Text                            as T
 import qualified Data.Text.Lazy                       as TL
+import           Data.Time.Calendar
 import           GetHandle
-import           GetTx
+import           GHC.Generics
 import           Network.HTTP.Req
-import           Network.HTTP.Types
-import           Network.HTTP.Types.Method
+import           Network.Wai.Handler.Warp
 import           Network.Wai.Middleware.Cors
 import           Network.Wai.Middleware.RequestLogger
+import           Servant
 import           System.Exit
-import           Text.URI
-import           Web.Scotty
+import           Text.URI                             as TU
 
 data Config = Config
   { hostPort  :: Int,
@@ -33,41 +31,24 @@ data Config = Config
   deriving (Show, Eq)
 
 defaultConfig :: Config
-defaultConfig = Config {hostPort = 5000, serverUrl = "https://cedric.app/api/dbsync/postgrest"}
+defaultConfig = Config {hostPort = 4000, serverUrl = "https://cedric.app/api/dbsync/postgrest"}
 
 getUrlFromConfig :: IO (Url 'Https)
 getUrlFromConfig = do
-  serverUri <- Control.Exception.catch (mkURI $ serverUrl defaultConfig) (const $ die "Invalid URL cannot be parsed" :: ParseException -> IO URI)
+  serverUri <- Control.Exception.catch (mkURI $ serverUrl defaultConfig) (const $ die "Invalid URL cannot be parsed" :: ParseException -> IO TU.URI)
   let rawServerUrl = useHttpsURI serverUri
   when (isNothing rawServerUrl) (die "Invalid URL cannot be parsed")
   pure $ fst $ fromJust rawServerUrl
 
-mainScotty :: IO ()
-mainScotty = do
+servantIO :: IO ()
+servantIO = do
   queryUrl <- getUrlFromConfig
+  run (hostPort defaultConfig) $ (simpleCors . logStdoutDev) $ servApp queryUrl
 
-  scotty (hostPort defaultConfig) $ do
-    middleware simpleCors
-    middleware logStdout
+servApp :: Url 'Https -> Application
+servApp = serve (Proxy :: Proxy CardanoAPI) . server1
 
-    addroute Network.HTTP.Types.Method.GET "/tx/:txhash" $ do
-      inputHash <- param "txhash"
-      v <- liftAndCatchIO $ runExceptT $ getTx inputHash
-      case v of
-        Right val -> Web.Scotty.json val
-        Left errStr -> do
-          status $ mkStatus 404 $ B.pack "Tx not found."
-          text errStr
+type CardanoAPI = "adahandle" :> Capture "inputHandle" TL.Text :> Get '[PlainText] TL.Text
 
-    addroute Network.HTTP.Types.Method.GET "/adahandle/:handle" $ do
-      inputHandle <- param "handle"
-      thandle <- liftAndCatchIO $ runReaderT (runExceptT $ getHandle inputHandle) queryUrl
-      case thandle of
-        Right handle -> Web.Scotty.text handle
-        Left sCode -> do
-          let errStr = case sCode of
-                400 -> "Bad request"
-                404 -> "Handle not found"
-                500 -> "Internal server error"
-          status $ mkStatus sCode $ B.pack errStr
-          text $ TL.pack $ show sCode ++ ": " ++ errStr
+server1 :: Url 'Https -> ServerT CardanoAPI Handler
+server1 queryUrl = flip runReaderT queryUrl . handleHandler
