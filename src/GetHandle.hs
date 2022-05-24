@@ -1,28 +1,30 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module GetHandle (getHandle) where
+module GetHandle (handleHandler) where
 
 import           Control.Monad
-import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.Except
-import           Control.Monad.Trans.Reader
+import           Control.Monad.Reader
 import           Data.Aeson
-import qualified Data.ByteString            as B
-import qualified Data.Text.Lazy             as TL
-import qualified Data.Text.Lazy.Encoding    as TL
-import           Network.HTTP.Req
-import           SendDbReq
+import qualified Data.ByteString         as B
+import qualified Data.Text.Lazy          as TL
+import qualified Data.Text.Lazy.Encoding as TL
+import           Network.HTTP.Simple
+import           Servant
 import           Text.Hex
+import           Types
 
+<<<<<<< HEAD
 newtype RawHandleAddr = Address { getAddr :: TL.Text }
+=======
+newtype RawHandleAddr = Address {getAddr :: TL.Text}
+>>>>>>> servant
   deriving (Show)
 
 instance FromJSON RawHandleAddr where
-  parseJSON = withObject "RawhandleAddr" $ \v ->
-    Address
-      <$> ((.: "tx_out") v >>= (.: "address"))
+  parseJSON = withObject "RawhandleAddr" $ fmap Address . (.: "address") <=< (.: "tx_out")
 
+<<<<<<< HEAD
 optionSchemeHttps :: TL.Text -> Option 'Https
 optionSchemeHttps hexHandleName =
   "select" =: ("id,tx_out!inner(id,address),multi_asset!inner(id,policy,name)" :: TL.Text)
@@ -52,6 +54,32 @@ getHandle handleName = do
       Error errStr     -> throwE 500
       Success []       -> throwE 404
       Success (x : xs) -> pure $ getAddr x
+=======
+query :: TL.Text -> Query
+query hexHandleName =
+  [ ("select", Just "id,tx_out!inner(id,address),multi_asset!inner(id,policy,name)"),
+    ("order", Just "id.desc"),
+    ("limit", Just "1"),
+    ("multi_asset.policy", Just "eq.\\xf0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a"),
+    ("multi_asset.name", Just $ "eq.\\x" <> B.toStrict (TL.encodeUtf8 hexHandleName))
+  ]
+
+handleHandler :: TL.Text -> ReaderT Config Handler TL.Text
+handleHandler inputHandle = do
+  cfg <- ask
+  request' <- parseRequest $ serverHost cfg ++ "/ma_tx_out"
+  let request = setRequestQueryString (query $ removeDollar inputHandle)
+              $ setRequestSecure (https cfg)
+              $ request'
+      portSetRequest = case serverPort cfg of
+        Nothing -> request
+        Just p  -> setRequestPort p request
+  response <- httpJSON portSetRequest
+  case fromJSON $ getResponseBody response :: Result [RawHandleAddr] of
+    Error _         -> throwError $ err500 {errBody = "Internal server error"}
+    Success []      -> throwError $ err404 {errBody = "Handle not found"}
+    Success (x : _) -> pure $ getAddr x
+>>>>>>> servant
 
 removeDollar :: TL.Text -> TL.Text
 removeDollar handleName =
