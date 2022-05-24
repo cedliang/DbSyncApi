@@ -18,9 +18,7 @@ newtype RawHandleAddr = Address {getAddr :: TL.Text}
   deriving (Show)
 
 instance FromJSON RawHandleAddr where
-  parseJSON = withObject "RawhandleAddr" $ \v ->
-    Address
-      <$> ((.: "tx_out") v >>= (.: "address"))
+  parseJSON = withObject "RawhandleAddr" $ fmap Address . (.: "address") <=< (.: "tx_out")
 
 optionScheme :: TL.Text -> (Option 'Http, Option 'Https)
 optionScheme hexHandleName =
