@@ -28,7 +28,8 @@ dependencies:
 
 library:
   source-dirs: src
-
+  verbatim:
+    default-language: GHC2021
 executables:
   scotty-project-exe:
     main:                Main.hs
@@ -39,7 +40,8 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - scotty-project
-
+    verbatim:
+      default-language: GHC2021
 tests:
   scotty-project-test:
     main:                Spec.hs
@@ -52,4 +54,5 @@ tests:
     - scotty-project
     - tasty
     - tasty-hunit
-
+    verbatim:
+      default-language: GHC2021
