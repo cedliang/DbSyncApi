@@ -1,30 +1,30 @@
-name:                scotty-project
-version:             0.1.0.0
-github:              "githubuser/scotty-project"
-license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2022 Author name here"
+name: scotty-project
+version: 0.1.0.0
+github: "githubuser/scotty-project"
+license: BSD3
+author: "Author name here"
+maintainer: "example@example.com"
+copyright: "2022 Author name here"
 
 extra-source-files:
-- README.md
-- ChangeLog.md
+  - README.md
+  - ChangeLog.md
 
-description:         Please see the README on GitHub at <https://github.com/githubuser/scotty-project#readme>
+description: Please see the README on GitHub at <https://github.com/githubuser/scotty-project#readme>
 
 dependencies:
-- base >= 4.7 && < 5
-- text
-- aeson
-- bytestring >= 0.11.3.0
-- exceptions
-- wai-cors
-- hex-text
-- wai-extra
-- servant-server
-- warp
-- mtl
-- http-conduit
+  - base >= 4.7 && < 5
+  - text
+  - aeson
+  - bytestring >= 0.11.3.0
+  - exceptions
+  - wai-cors
+  - hex-text
+  - wai-extra
+  - servant-server
+  - warp
+  - mtl
+  - http-conduit
 
 library:
   source-dirs: src
@@ -32,27 +32,27 @@ library:
     default-language: GHC2021
 executables:
   scotty-project-exe:
-    main:                Main.hs
-    source-dirs:         app
+    main: Main.hs
+    source-dirs: app
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
     dependencies:
-    - scotty-project
+      - scotty-project
     verbatim:
       default-language: GHC2021
 tests:
   scotty-project-test:
-    main:                Spec.hs
-    source-dirs:         test
+    main: Spec.hs
+    source-dirs: test
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
     dependencies:
-    - scotty-project
-    - tasty
-    - tasty-hunit
+      - scotty-project
+      - tasty
+      - tasty-hunit
     verbatim:
       default-language: GHC2021
