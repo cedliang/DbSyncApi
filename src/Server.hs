@@ -13,19 +13,20 @@ import           Network.Wai.Middleware.RequestLogger
 import           Servant
 import           Types
 
-defaultConfig :: Config
-defaultConfig = Config { hostPort = 4000
-                       , https = True
-                       , serverHost = "https://cedric.app/api/dbsync/postgrest"
-                       , serverPort = Nothing
-                       }
-
 -- defaultConfig :: Config
 -- defaultConfig = Config { hostPort = 4000
---                        , https = False
---                        , serverHost = "http://192.168.20.10"
---                        , serverPort = Just 3000
+--                        , https = True
+--                        , serverHost = "https://cedric.app/api/dbsync/postgrest"
+--                        , serverPort = Nothing
 --                        }
+
+defaultConfig :: Config
+defaultConfig = Config { hostPort = 6000
+                       , https = False
+                       , serverHost = "http://127.0.0.1"
+                       , serverPort = Just 3000
+                       }
+
 servantIO :: IO ()
 servantIO = do
   run (hostPort defaultConfig)
