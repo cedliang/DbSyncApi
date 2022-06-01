@@ -21,7 +21,7 @@ import           Types
 --                        }
 
 defaultConfig :: Config
-defaultConfig = Config { hostPort = 6000
+defaultConfig = Config { hostPort = 6069
                        , https = False
                        , serverHost = "http://127.0.0.1"
                        , serverPort = Just 3000
