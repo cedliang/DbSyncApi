@@ -40,4 +40,4 @@ type CardanoAPI =
   "adahandle" :> Capture "inputHandle" TL.Text :> Get '[PlainText] TL.Text
 
 server1 :: Config -> ServerT CardanoAPI Handler
-server1 queryUrl = flip runReaderT queryUrl . handleHandler
+server1 = (. handleHandler) . flip runReaderT
